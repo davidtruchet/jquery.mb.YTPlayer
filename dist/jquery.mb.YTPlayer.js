@@ -269,10 +269,10 @@ var getYTPVideoID = function( url ) {
 					opacity: 1
 				} );
 
-				if( !jQuery.browser.mobile ) {
-					playerBox.after( overlay );
-					YTPlayer.overlay = overlay;
-				}
+				
+				playerBox.after( overlay );
+				YTPlayer.overlay = overlay;
+				
 
 				if( !YTPlayer.isBackground ) {
 					overlay.on( "mouseenter", function() {
@@ -320,22 +320,27 @@ var getYTPVideoID = function( url ) {
 								} );
 							}
 							new YT.Player( playerID, {
-								videoId: YTPlayer.videoID.toString(),
-								height: '100%',
-								width: '100%',
-								playerVars: playerVars,
-								events: {
-									'onReady': function( event ) {
-										YTPlayer.player = event.target;
-										playerBox.css( {
-											opacity: 1
-										} );
-										YTPlayer.wrapper.css( {
-											opacity: 1
-										} );
-									}
-								}
-							} );
+	                            videoId: YTPlayer.videoID.toString(),
+	                            playerVars: playerVars,
+	                            events: {
+	                                'onReady': function( event ) {
+	                                    YTPlayer.player = event.target;
+	                                    if( YTPlayer.isReady ) return;
+	                                    YTPlayer.isReady = YTPlayer.isPlayer && !YTPlayer.opt.autoPlay ? false : true;
+	                                    YTPlayer.playerEl = YTPlayer.player.getIframe();
+
+	                                    jQuery( YTPlayer.playerEl ).unselectable();
+
+	                                    $YTPlayer.optimizeDisplay();
+	                                    YTPlayer.videoID = videoID;
+	                                    jQuery( window ).off( "resize.YTP_" + YTPlayer.id ).on( "resize.YTP_" + YTPlayer.id, function() {
+	                                        $YTPlayer.optimizeDisplay();
+	                                    } );
+
+	                                    jQuery.mbYTPlayer.checkForState( YTPlayer );
+	                                }
+	                            }
+	                        } );
 							return;
 						}
 
